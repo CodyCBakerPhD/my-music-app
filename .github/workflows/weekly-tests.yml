@@ -1,0 +1,37 @@
+name: Weekly tests
+
+# Catches dependency drift and new browser releases between changes.
+
+on:
+    schedule:
+        - cron: "0 9 * * 1"
+    workflow_dispatch:
+
+jobs:
+    tests:
+        uses: ./.github/workflows/test.yml
+        secrets: inherit
+        permissions:
+            contents: read
+
+    notify-on-failure:
+        runs-on: ubuntu-latest
+        needs: [tests]
+        if: failure()
+        permissions: {}
+        steps:
+            - uses: dawidd6/action-send-mail@v18
+              with:
+                  server_address: smtp.gmail.com
+                  server_port: 465
+                  username: ${{ secrets.MAIL_USERNAME }}
+                  password: ${{ secrets.MAIL_PASSWORD }}
+                  subject: "CI Failure: `my-music-app` Weekly tests"
+                  to: ${{ secrets.MAIL_USERNAME }}
+                  from: my-music-app
+                  body: |
+                      The weekly test run for the my-music-app repository has failed.
+
+                      Tests: ${{ needs.tests.result }}
+
+                      Please review the workflow run at https://github.com/CodyCBakerPhD/my-music-app/actions/workflows/weekly-tests.yml

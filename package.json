@@ -1,0 +1,53 @@
+{
+    "name": "my-music-app",
+    "version": "1.0.0",
+    "description": "Music manager (VLC helper): browse song metadata and playlists, and build VLC-ready folders in the browser.",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite --config configs/vite.config.js",
+        "build": "vite build --config configs/vite.config.js",
+        "preview": "vite preview --config configs/vite.config.js",
+        "format": "prettier --config configs/prettier.config.cjs --write .",
+        "format:check": "prettier --config configs/prettier.config.cjs --check .",
+        "typecheck": "tsc --noEmit --project configs/tsconfig.json",
+        "test": "vitest run --config configs/vitest.config.js",
+        "test:watch": "vitest --config configs/vitest.config.js",
+        "test:coverage": "vitest run --coverage --config configs/vitest.config.js",
+        "test:e2e": "playwright test --config configs/playwright.config.js",
+        "test:chromatic": "playwright test --config configs/playwright.chromatic.config.js",
+        "storybook": "storybook dev -p 6006 --config-dir configs/storybook",
+        "build-storybook": "storybook build --config-dir configs/storybook"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/CodyCBakerPhD/my-music-app.git"
+    },
+    "author": "Cody Baker",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/CodyCBakerPhD/my-music-app/issues"
+    },
+    "homepage": "https://github.com/CodyCBakerPhD/my-music-app#readme",
+    "dependencies": {
+        "fflate": "^0.8.3",
+        "js-yaml": "^5.4.2"
+    },
+    "devDependencies": {
+        "@chromatic-com/playwright": "^1.0.0",
+        "@playwright/test": "^1.63.0",
+        "@storybook/html-vite": "^10.6.1",
+        "@types/node": "^26.6.3",
+        "@vitest/coverage-v8": "^5.0.3",
+        "chromatic": "^18.10.1",
+        "jsdom": "^29.1.1",
+        "prettier": "^3.9.9",
+        "storybook": "^10.6.1",
+        "typescript": "^7.0.2",
+        "vite": "^8.3.1",
+        "vitest": "^5.0.3"
+    },
+    "overrides": {
+        "esbuild": "^0.28.1"
+    }
+}

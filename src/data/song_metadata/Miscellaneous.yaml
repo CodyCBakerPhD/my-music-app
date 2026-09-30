@@ -1,0 +1,15 @@
+- name: Enemy
+  tags: Arcane
+  url: https://www.youtube.com/watch?v=IOrbP1OqNsg
+  creators: Imagine Dragons
+
+- name: Sardaukar Chant
+  tags: Dune
+  url: https://www.youtube.com/watch?v=eoOfK6x5s1U
+  creators: Hans Zimmer
+  notes: "TODO: unfade middle part"
+
+- name: Black Blade
+  tags: Epic
+  url: https://music.youtube.com/watch?v=skBwn3A3QAw
+  creators: Two Steps from Hell

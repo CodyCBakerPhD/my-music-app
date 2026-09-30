@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "quarterly"
+    reviewers:
+      - "CodyCBakerPhD"
+    assignees:
+      - "CodyCBakerPhD"
+    labels: []
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "quarterly"
+    reviewers:
+      - "CodyCBakerPhD"
+    assignees:
+      - "CodyCBakerPhD"
+    labels: []

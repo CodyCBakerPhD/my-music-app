@@ -1,0 +1,14 @@
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+nohup.out
+
+# Node / web
+node_modules/
+dist/
+storybook-static/
+playwright-report/
+playwright-report-chromatic/
+test-results/
+coverage/

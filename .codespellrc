@@ -1,0 +1,4 @@
+[codespell]
+# Song metadata is full of names and non-English titles.
+skip = .git*,*.pdf,*.css,*.yaml,*.m3u,package-lock.json,./node_modules,./dist,./storybook-static,./coverage,./playwright-report*,./test-results
+check-hidden = true
