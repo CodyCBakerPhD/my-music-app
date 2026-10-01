@@ -188,6 +188,29 @@ test.describe("Music page", () => {
                 await (await (await source.getFileHandle("Wide Awake.wav", { create: true })).createWritable()).close();
                 return music;
             };
+
+            // Chromium 153 crashes reading an origin-private folder handle back
+            // out of IndexedDB, so reads of the remembered folder hand back a
+            // fresh handle to the same folder instead.  Whether one was stored
+            // (or forgotten) still comes from IndexedDB itself.
+            const realGet = IDBObjectStore.prototype.get;
+            IDBObjectStore.prototype.get = function (query) {
+                if (this.name !== "folders") return realGet.call(this, query);
+                const lookup = this.getKey(query);
+                const request = { result: undefined, error: null, onsuccess: null, onerror: null };
+                lookup.onsuccess = async () => {
+                    if (lookup.result !== undefined) {
+                        const root = await navigator.storage.getDirectory();
+                        request.result = await root.getDirectoryHandle("music");
+                    }
+                    request.onsuccess?.();
+                };
+                lookup.onerror = () => {
+                    request.error = lookup.error;
+                    request.onerror?.();
+                };
+                return request;
+            };
         });
         await page.goto("/#build");
         await expect(page.locator("#reuse_folder_btn")).toBeHidden();
