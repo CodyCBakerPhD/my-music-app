@@ -12,6 +12,7 @@ import {
 } from "./generator";
 import { getLibrary, type Library } from "./library";
 import { toM3U, type Playlist, type Song } from "./playlists";
+import { forgetFolder, recallFolder, regainAccess, rememberFolder, type HandleStore } from "./remembered";
 import { DirectorySink, supportsDirectoryWrite, ZipSink, type DirectoryHandle } from "./sinks";
 
 export type View = "playlists" | "songs" | "build";
@@ -306,7 +307,7 @@ interface BuildState {
     downloadURL: string | null;
 }
 
-function initBuild(library: Library, root: Document): void {
+function initBuild(library: Library, root: Document, handleStore?: HandleStore): void {
     const state: BuildState = { layout: null, directory: null, downloadURL: null };
     const canWrite = supportsDirectoryWrite(window);
     const pickButton = byId<HTMLButtonElement>("pick_folder_btn", root);
@@ -314,6 +315,8 @@ function initBuild(library: Library, root: Document): void {
     const generateButton = byId<HTMLButtonElement>("generate_btn", root);
     const downloadLink = byId<HTMLAnchorElement>("download_link", root);
     const folderName = byId("folder_name", root);
+    const reuseButton = byId<HTMLButtonElement>("reuse_folder_btn", root);
+    const forgetButton = byId<HTMLButtonElement>("forget_folder_btn", root);
     const progress = byId("progress", root);
     const progressBar = byId<HTMLProgressElement>("progress_bar", root);
     const progressLabel = byId("progress_label", root);
@@ -333,6 +336,49 @@ function initBuild(library: Library, root: Document): void {
         );
     };
 
+    const showError = (error: unknown): void => {
+        byId("build_result", root).replaceChildren(h("p", { class: "error" }, String(error)));
+    };
+
+    const useDirectory = async (handle: FileSystemDirectoryHandle): Promise<void> => {
+        state.directory = handle;
+        const files = await filesFromDirectory(handle);
+        accept(classifyFiles(files), handle.name);
+    };
+
+    let remembered: FileSystemDirectoryHandle | null = null;
+    const showRemembered = (handle: FileSystemDirectoryHandle | null): void => {
+        remembered = handle;
+        reuseButton.hidden = handle === null;
+        forgetButton.hidden = handle === null;
+        reuseButton.textContent = handle === null ? "" : `Use "${handle.name}" again`;
+        pickButton.textContent = handle === null ? "Choose music folder…" : "Choose another folder…";
+        pickButton.className = handle === null ? "primary" : "secondary";
+    };
+
+    if (canWrite) {
+        void recallFolder(handleStore).then(showRemembered);
+    }
+
+    reuseButton.addEventListener("click", async () => {
+        if (remembered === null) return;
+        try {
+            if (!(await regainAccess(remembered))) {
+                showError("Access to the folder was not allowed; choose it again or allow access when asked.");
+                return;
+            }
+            await useDirectory(remembered);
+        } catch (error) {
+            // The folder was moved, renamed or deleted since.
+            showError(error);
+        }
+    });
+
+    forgetButton.addEventListener("click", async () => {
+        await forgetFolder(handleStore);
+        showRemembered(null);
+    });
+
     pickButton.addEventListener("click", async () => {
         if (!canWrite) {
             folderInput.click();
@@ -341,12 +387,12 @@ function initBuild(library: Library, root: Document): void {
         try {
             const picker = (window as unknown as { showDirectoryPicker: DirectoryPicker }).showDirectoryPicker;
             const handle = await picker({ mode: "readwrite", id: "music" });
-            state.directory = handle;
-            const files = await filesFromDirectory(handle);
-            accept(classifyFiles(files), handle.name);
+            await useDirectory(handle);
+            await rememberFolder(handle, handleStore);
+            showRemembered(handle);
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") return;
-            byId("build_result", root).replaceChildren(h("p", { class: "error" }, String(error)));
+            showError(error);
         }
     });
 
@@ -364,6 +410,7 @@ function initBuild(library: Library, root: Document): void {
         const sink = state.directory !== null ? new DirectorySink(state.directory) : new ZipSink();
         generateButton.disabled = true;
         pickButton.disabled = true;
+        reuseButton.disabled = true;
         downloadLink.hidden = true;
         if (state.downloadURL !== null) URL.revokeObjectURL(state.downloadURL);
         progress.hidden = false;
@@ -388,6 +435,7 @@ function initBuild(library: Library, root: Document): void {
         } finally {
             generateButton.disabled = false;
             pickButton.disabled = false;
+            reuseButton.disabled = false;
         }
     });
 }

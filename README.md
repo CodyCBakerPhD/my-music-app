@@ -32,6 +32,8 @@ music/
 └── logs/        one `<song>_error.log` per song that could not be converted
 ```
 
+Chromium-based browsers also remember the folder: on later visits, press _Use "music" again_ and allow access when the browser asks. _Forget folder_ clears it.
+
 Everything runs in the browser tab; no audio is uploaded anywhere. Chromium-based browsers (Chrome, Edge, Brave, ...) write `vlc/` and `logs/` straight into the chosen folder. Other browsers get a `vlc.zip` download instead, which is built in memory, so prefer a Chromium-based browser for a whole library.
 
 Songs are decoded by the browser and re-encoded as 16-bit, 44.1 kHz `.wav`. A playlist gets an `.m3u` only when every one of its songs was converted; the page lists the ones that were skipped and why.

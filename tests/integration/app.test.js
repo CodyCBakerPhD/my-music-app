@@ -176,4 +176,39 @@ test.describe("Music page", () => {
         });
         expect(listing).toEqual(["vlc/Mix.m3u:5", "vlc/a.wav:4", "logs/b_error.log:4"]);
     });
+
+    test("remembers the chosen folder across visits", async ({ page }) => {
+        // The origin-private file system stands in for the person's folder,
+        // and the picker returns it instead of opening a dialog.
+        await page.addInitScript(() => {
+            window.showDirectoryPicker = async () => {
+                const root = await navigator.storage.getDirectory();
+                const music = await root.getDirectoryHandle("music", { create: true });
+                const source = await music.getDirectoryHandle("source", { create: true });
+                await (await (await source.getFileHandle("Wide Awake.wav", { create: true })).createWritable()).close();
+                return music;
+            };
+        });
+        await page.goto("/#build");
+        await expect(page.locator("#reuse_folder_btn")).toBeHidden();
+        await page.locator("#pick_folder_btn").click();
+        await expect(page.locator("#folder_check")).toContainText("Found 1 source songs");
+        await expect(page.locator("#reuse_folder_btn")).toHaveText('Use "music" again');
+
+        await page.evaluate(() => sessionStorage.setItem("keep-storage", "1"));
+        await page.reload();
+        await expect(page.locator("#folder_check")).toBeHidden();
+        await expect(page.locator("#reuse_folder_btn")).toHaveText('Use "music" again');
+        await expect(page.locator("#pick_folder_btn")).toHaveText("Choose another folder…");
+        await page.locator("#reuse_folder_btn").click();
+        await expect(page.locator("#folder_name")).toHaveText("music");
+        await expect(page.locator("#folder_check")).toContainText("Found 1 source songs");
+        await expect(page.locator("#generate_btn")).toBeEnabled();
+
+        await page.locator("#forget_folder_btn").click();
+        await expect(page.locator("#reuse_folder_btn")).toBeHidden();
+        await page.reload();
+        await expect(page.locator("#pick_folder_btn")).toHaveText("Choose music folder…");
+        await expect(page.locator("#reuse_folder_btn")).toBeHidden();
+    });
 });

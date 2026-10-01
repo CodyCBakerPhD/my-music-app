@@ -286,10 +286,32 @@ a.button {
     white-space: nowrap;
 }
 
-a.button {
+a.button,
+button.secondary {
     background: var(--surface-2);
     border-color: var(--border);
     color: var(--text);
+}
+
+button.secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button.link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--link);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 button:disabled {
