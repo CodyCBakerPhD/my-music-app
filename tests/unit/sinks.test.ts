@@ -55,6 +55,16 @@ describe("DirectorySink", () => {
         expect(root.folders.get("logs")!.files.get("b_error.log")).toBe("boom");
     });
 
+    test("refuses to carry on over a vlc/ it could not remove", async () => {
+        const root = new FakeDirectory("music");
+        root.removeEntry = async () => {
+            throw new DOMException("in use", "NoModificationAllowedError");
+        };
+        await expect(new DirectorySink(root).begin()).rejects.toThrow(
+            /Could not clear the old vlc\/ folder \(NoModificationAllowedError: in use\)/
+        );
+    });
+
     test("starts fine when there is no vlc/ yet", async () => {
         const root = new FakeDirectory("music");
         await new DirectorySink(root).begin();

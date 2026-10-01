@@ -219,12 +219,12 @@ export function renderSongs(library: Library, filter: string, root: Document = d
 
 // ── Build ────────────────────────────────────────────────────────────────────
 
-function list(title: string, items: readonly string[], limit = 50): HTMLElement | null {
+function list(title: string, items: readonly string[], { limit = 50, open = false } = {}): HTMLElement | null {
     if (items.length === 0) return null;
     const shown = items.slice(0, limit);
     return h(
         "details",
-        {},
+        { open },
         h("summary", {}, `${title} (${items.length})`),
         h("ul", { class: "compact" }, ...shown.map((item) => h("li", {}, item))),
         items.length > limit ? h("p", { class: "muted" }, `…and ${items.length - limit} more`) : null
@@ -269,11 +269,14 @@ export function renderResult(result: GenerationResult, root: Document = document
                   `File counts (pre: ${result.countMismatch.pre}, post: ${result.countMismatch.post}) do not match.`
               )
             : null,
+        // Open by default: a skipped playlist is not written at all, so any older
+        // copy of it (on the phone, say) is left without the newer songs.
         list(
             "Songs that failed (see logs/)",
-            result.errors.map((error) => `${error.song}: ${error.message}`)
+            result.errors.map((error) => `${error.song}: ${error.message}`),
+            { open: true }
         ),
-        list("Playlists skipped for missing songs", incomplete)
+        list("Playlists skipped for missing songs (not written)", incomplete, { open: true })
     );
 }
 

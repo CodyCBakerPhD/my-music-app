@@ -27,10 +27,18 @@ export class DirectorySink implements OutputSink {
 
     async begin(): Promise<void> {
         // A fresh `vlc/` every run, so nothing left over from an earlier one lingers.
+        // Only a missing folder is fine: carrying on over one that could not be
+        // removed would leave its old playlists in place.
         try {
             await this.root.removeEntry("vlc", { recursive: true });
-        } catch {
-            // Did not exist yet.
+        } catch (error) {
+            if (!(error instanceof DOMException && error.name === "NotFoundError")) {
+                const reason = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+                throw new Error(
+                    `Could not clear the old vlc/ folder (${reason}). Close anything using its files, ` +
+                        "such as iTunes or File Explorer, or delete the folder yourself, then generate again."
+                );
+            }
         }
         this.folders.clear();
     }

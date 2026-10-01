@@ -223,5 +223,9 @@ describe("build reports", () => {
         expect(text).toContain("File counts (pre: 1, post: 0) do not match.");
         expect(text).toContain("a: bad");
         expect(text).toContain("Mix: missing a, b, c, d, e, …");
+        expect(text).toContain("Playlists skipped for missing songs (not written) (1)");
+        for (const details of document.querySelectorAll("#build_result details")) {
+            expect((details as HTMLDetailsElement).open).toBe(true);
+        }
     });
 });
