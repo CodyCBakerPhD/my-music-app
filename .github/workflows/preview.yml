@@ -30,15 +30,20 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          # No lockfile to cache by until the app lands.
+          cache: ${{ hashFiles('package-lock.json') != '' && 'npm' || '' }}
 
-      - name: Install dependencies
-        if: github.event.action != 'closed'
-        run: npm ci
-
+      # Until the app lands, preview the placeholder page.
       - name: Build site
         if: github.event.action != 'closed'
-        run: npm run build
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            npm run build
+          else
+            mkdir -p dist
+            cp index.html dist/
+          fi
 
       - name: Upload site
         if: github.event.action != 'closed'
