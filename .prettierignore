@@ -1,0 +1,14 @@
+node_modules/
+dist/
+storybook-static/
+coverage/
+playwright-report*/
+test-results/
+package-lock.json
+# Hand-maintained content and CI files keep their own layout.
+src/data/
+tests/fixtures/music/
+.github/
+*.yaml
+*.yml
+*.md
